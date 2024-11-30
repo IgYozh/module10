@@ -12,10 +12,9 @@ class Bank(Thread):
 
     def deposit(self):
         for i in range(100):
-            if self.balance >= 500 and self.lock.locked():
-                self.lock.release()
             a = random.randint(50, 500)
-            self.balance += a
+            if a >= self.balance:
+                self.balance += a
             print(f'Пополнение: {a} ₽. Баланс:{self.balance} ₽')
             time.sleep(0.001)
 
@@ -25,12 +24,14 @@ class Bank(Thread):
         for i in range(100):
             x = random.randint(50, 500)
             print(f'Запрос на {x} ₽')
+            self.lock.acquire()
             if x <= self.balance:
                 self.balance -= x
                 print(f'Снятие:{x} ₽. Баланс: {self.balance} ₽')
+                self.lock.release()
             else:
                 print(f'Запрос отклонён, недостаточно средств')
-                self.lock.acquire()
+                self.lock.release()
             time.sleep(0.001)
 
 
@@ -47,4 +48,3 @@ thread1.join()
 thread2.join()
 
 print(f'Итоговый баланс: {bk.balance} ₽')
-
